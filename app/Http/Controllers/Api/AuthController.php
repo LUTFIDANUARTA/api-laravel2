@@ -22,6 +22,8 @@ class AuthController extends Controller
             'name'     => $data['name'],
             'email'    => $data['email'],
             'password' => Hash::make($data['password']),
+            
+            'role' => 'user'
         ]);
 
         // langsung buat token pertama
