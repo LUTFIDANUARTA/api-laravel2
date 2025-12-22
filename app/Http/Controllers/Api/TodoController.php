@@ -36,6 +36,7 @@ class TodoController extends Controller
 
     public function update(Request $request, Todo $todo)
     {
+        // Cek kepemilikan dulu
         $this->authorizeOwner($todo);
 
         $data = $request->validate([
@@ -52,10 +53,12 @@ class TodoController extends Controller
         }
 
         if ($request->hasFile('attachment')) {
+            // Hapus file lama jika ada
             if ($todo->attachment_path) {
                 Storage::disk('public')->delete($todo->attachment_path);
             }
 
+            // Upload file baru
             $todo->attachment_path = $request->file('attachment')
                 ->store('todo_attachments', 'public');
         }
@@ -67,6 +70,7 @@ class TodoController extends Controller
 
     public function destroy(Todo $todo)
     {
+        // Cek kepemilikan dulu
         $this->authorizeOwner($todo);
 
         if ($todo->attachment_path) {
@@ -76,5 +80,16 @@ class TodoController extends Controller
         $todo->delete();
 
         return response()->noContent();
+    }
+
+    /**
+     * FUNGSI TAMBAHAN: Untuk mengecek apakah user yang login adalah pemilik todo
+     */
+    public function authorizeOwner($todo)
+    {
+        // Jika ID pemilik todo TIDAK SAMA dengan ID user yang sedang login
+        if ($todo->user_id !== Auth::id()) {
+            abort(403, 'Anda tidak memiliki akses untuk mengubah data ini.');
+        }
     }
 }
