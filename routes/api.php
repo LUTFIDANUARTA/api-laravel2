@@ -9,7 +9,7 @@ use App\Models\User;
 
 // Public
 Route::post('/register', [AuthController::class, 'register']);
-Route::post('/login',    [AuthController::class, 'login']);
+Route::post('/login',    [AuthController::class, 'login'])->name('login');
 
 // Protected: semua user harus login
 Route::middleware('auth:sanctum')->group(function () {

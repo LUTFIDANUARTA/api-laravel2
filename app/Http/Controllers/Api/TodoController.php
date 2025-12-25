@@ -10,6 +10,18 @@ use Illuminate\Support\Facades\Storage;
 
 class TodoController extends Controller
 {
+    /**
+     * index: Mengambil semua todo milik user yang sedang login.
+     * (FUNGSI INI YANG TADI HILANG)
+     */
+    public function index()
+    {
+        // Ambil data todo berdasarkan user_id, urutkan dari yang terbaru
+        $todos = Todo::where('user_id', Auth::id())->latest()->get();
+
+        return response()->json($todos);
+    }
+
     public function store(Request $request)
     {
         $data = $request->validate([
@@ -25,7 +37,9 @@ class TodoController extends Controller
                 ->store('todo_attachments', 'public');
         }
 
-        $todo = Auth::user()->todos()->create([
+        // Simpan ke database
+        $todo = Todo::create([
+            'user_id'         => Auth::id(),
             'title'           => $data['title'],
             'completed'       => $data['completed'] ?? false,
             'attachment_path' => $attachmentPath
@@ -73,6 +87,7 @@ class TodoController extends Controller
         // Cek kepemilikan dulu
         $this->authorizeOwner($todo);
 
+        // Hapus file fisik jika ada
         if ($todo->attachment_path) {
             Storage::disk('public')->delete($todo->attachment_path);
         }
